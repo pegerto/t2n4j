@@ -1,11 +1,8 @@
+import argparse
 import json
 
-from neo4j.v1 import GraphDatabase, basic_auth
 from aws import *
-
-state_file = 'xx'
-with open(state_file, 'r') as f:
-    state = json.load(f)
+from neo4j.v1 import GraphDatabase, basic_auth
 
 def insert_item(resource, session):
     def not_exist(resource, session):
@@ -20,7 +17,21 @@ def insert_item(resource, session):
     return action.get(resource['type'], not_exist)(resource, session)
 
 def main():
-    driver = GraphDatabase.driver("bolt://xxx", auth=basic_auth("xxx", "xxx"))
+    parser = argparse.ArgumentParser(description="""
+        Insert a Terraform state file into neo4j
+    """)
+    parser.add_argument('-d','--db', required=True, help="Neo4j host")
+    parser.add_argument('-u','--username', required=True, help="Neo4j user")
+    parser.add_argument('-p','--password', required=True, help="Neo4j password")
+    parser.add_argument('state_file', help="Terraform state file")
+    args = parser.parse_args()
+
+    print args
+    with open(args.state_file, 'r') as f:
+        state = json.load(f)
+
+    driver = GraphDatabase.driver("bolt://{}".format(args.db),
+        auth=basic_auth(args.username, args.password))
     session = driver.session()
 
     # Reduce all the modules and resouces to a single array of objects
