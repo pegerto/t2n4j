@@ -22,13 +22,13 @@ def insert_aws_subnet(resource, session):
 
 def insert_aws_instance(resource, session):
     attr = resource['primary']['attributes']
-    t = Template(r"""CREATE (i:Instance {name: '$name', id: '$id',
-                     subnet_id: '$subnet_id'})
-                  """)
-    session.run(t.substitute (
-                    name=attr['tags.Name'],
-                    id=attr['id'],
-                    subnet_id=attr['subnet_id']))
+    statement = r"""CREATE (i:Instance {name: {name}, id: {id},
+                     subnet_id: {subnet_id}})
+                  """
+    s = session.run(statement, {
+                    "name": attr['tags.Name'],
+                    "id": attr['id'],
+                    "subnet_id": attr['subnet_id']})
     return None
 
 
