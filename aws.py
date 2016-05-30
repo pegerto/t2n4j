@@ -6,7 +6,7 @@ def create_plug_relation(session):
 
 
 def create_subnet_network_relation(session):
-    session.run(r"MATCH (n:Network),(s:Subnet) WHERE n.id = s.vpc_id CREATE (s)-[r:SUBNET]->(n)")
+    s = session.run(r"MATCH (n:Network),(s:Subnet) WHERE n.id = s.vpc_id CREATE (s)-[r:SUBNET{az:s.az}]->(n)")
 
 
 def insert_aws_subnet(resource, session):
@@ -25,7 +25,7 @@ def insert_aws_instance(resource, session):
     statement = r"""CREATE (i:Instance {name: {name}, id: {id},
                      subnet_id: {subnet_id}})
                   """
-    s = session.run(statement, {
+    session.run(statement, {
                     "name": attr['tags.Name'],
                     "id": attr['id'],
                     "subnet_id": attr['subnet_id']})
